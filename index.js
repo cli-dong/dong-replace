@@ -5,9 +5,7 @@ var path = require('path')
 var gutil = require('gulp-util')
 var through = require('through2')
 
-module.exports = function(options, dict) {
-  options || (options = {})
-
+module.exports = function(dict, replace) {
   return through.obj(function(file, enc, cb) {
     if (file.isNull()) {
       cb(null, file)
@@ -21,7 +19,7 @@ module.exports = function(options, dict) {
 
     var regexp
 
-    if (dict) {
+    if (dict || !replace) {
       regexp = (function(ext) {
         switch (ext) {
           case '.handlebars':
@@ -39,15 +37,23 @@ module.exports = function(options, dict) {
 
     if (regexp) {
       content = file.contents.toString()
-        .replace(regexp,
-          /*jshint maxparams:4*/
-          function(all, begin, key, end) {
-            if (key in dict) {
-              return begin + dict[key] + end
-            }
 
-            return all;
-          })
+      if (replace) {
+        // translate
+        content = content
+          .replace(regexp,
+            /*jshint maxparams:4*/
+            function(all, begin, key, end) {
+              if (key in dict) {
+                return begin + dict[key] + end
+              }
+
+              return all;
+            })
+      } else {
+        // generate keys
+        file.keys = content.match(regexp)
+      }
     }
 
     try {

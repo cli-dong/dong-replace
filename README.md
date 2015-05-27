@@ -14,5 +14,5 @@ $ npm install --save dong-replace
 
 ```js
 vfs.src(view, { dot: false })
-  .pipe(replace(options, dict))
+  .pipe(replace(dict, true))
 ```
